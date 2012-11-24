@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, with_statement)
 
-from dpc.rbtree import RedBlackTree
+from algae.rbtree import RedBlackTree
 
 # Local variables:
 # mode: Python
