@@ -1,5 +1,5 @@
 from __future__ import (absolute_import, division, with_statement)
-from dpc.functions import identity
+from algae.functions import identity
 from functools import partial
 from operator import lt
 
