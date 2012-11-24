@@ -4,6 +4,8 @@ from functools import partial
 from operator import lt
 
 class RedBlackTree(object):
+    unspecified = object()
+
     """A binary search tree which guarantees that basic operations take place
 in O(lg n) time.  The terminology and basic algorithmic structure is taken
 from Cormen, Leiserson, Rivest, Stein, _Introduction to Algorithms_ (Second
@@ -31,38 +33,6 @@ red-black tree must satisfy the following properties:
     @staticmethod
     def __is_red(node):
         return node is not None and node.red
-
-    @staticmethod
-    def __get_left(node):
-        if node is None:
-            return None
-        return node.left
-
-    @staticmethod
-    def __get_right(node):
-        if node is None:
-            return None
-        return node.right
-
-    @staticmethod
-    def __get_parent(node):
-        if node is None:
-            return None
-        return node.parent
-
-    @staticmethod
-    def __get_grandparent(node):
-        return RedBlackTree.__get_parent(RedBlackTree.__get_parent(node))
-
-    @staticmethod
-    def __get_uncle(node):
-        parent = RedBlackTree.__get_parent(node)
-        gp = RedBlackTree.__get_parent(parent)
-        gp_left = RedBlackTree.__get_left(gp)
-        if gp_left is parent:
-            return RedBlackTree.__get_right(gp)
-        else:
-            return gp_left
 
     def __left_rotate(self, x):
         """Perform a left rotation on the specified node.  The right child of
@@ -376,6 +346,16 @@ the node must not be None.
         x.red = False
         return
 
+    def __rb_min(self):
+        """Returns the minimum node of the tree."""
+        if self.root is None:
+            return None
+
+        n = self.root
+        while n.left is not None:
+            n = n.left
+        return n
+
     def __getitem__(self, key):
         node = self.find_node(key)
         if node is None:
@@ -399,45 +379,74 @@ the node must not be None.
         if node is None:
             raise KeyError("Unknown key: %r" % (key,))
         self.__rb_delete(node)
-    
+
     def iterkeys(self):
-        return iter(self.keys())
+        return generate_nodes(self.root, lambda n: n.key)
 
     def itervalues(self):
-        return iter(self.values())
+        return generate_nodes(self.root, lambda n: n.value)
 
     def iteritems(self):
-        return iter(self.items())
+        return generate_nodes(self.root, lambda n: (n.key, n.value))
 
     def keys(self):
-        result = []
-        def callback(result, node):
-            result.append(node.key)
-
-        if self.root is not None:
-            self.root.depth_first_search(partial(callback, result))
-
-        return result
+        return list(self.iterkeys())
 
     def values(self):
-        result = []
-        def callback(result, node):
-            result.append(node.value)
-
-        if self.root is not None:
-            self.root.depth_first_search(partial(callback, result))
-
-        return result
+        return list(self.itervalues())
 
     def items(self):
-        result = []
-        def callback(result, node):
-            result.append((node.key, node.value))
-        
-        if self.root is not None:
-            self.root.depth_first_search(partial(callback, result))
+        return list(self.iteritems())
 
-        return result
+    def max(self, key=unspecified):
+        if key is unspecified:
+            node = self.root
+            if node is None:
+                return None
+            while node.right is not None:
+                node = node.right
+        else:
+            node = self.find_node_ceil(key)
+            if node is None:
+                return None
+        return (node.key, node.value)
+
+    def max(self, key=unspecified):
+        if key is unspecified:
+            node = self.root
+            if node is None:
+                return None
+            while node.left is not None:
+                node = node.left
+        else:
+            node = self.find_node_floor(key)
+            if node is None:
+                return None
+        return (node.key, node.value)
+
+    def update(self, obj):
+        if hasattr(obj, "iteritems"):
+            for key, value in obj.iteritems():
+                self[key] = value
+        elif hasattr(obj, "items"):
+            for key, value in obj.items():
+                self[key] = value
+        else:
+            for key, value in obj:
+                self[key] = value
+        return
+
+    def __repr__(self):
+        return ("{" + ", ".join([repr(key) + ": " + repr(value)
+                                 for key, value in self.iteritems()]) + "}")
+
+def generate_nodes(node, transform=identity):
+    if node is not None:
+        for child in generate_nodes(node.left, transform):
+            yield child
+        yield transform(node)
+        for child in generate_nodes(node.right, transform):
+            yield child
 
 class RedBlackTreeNode(object):
     def __init__(self, key, value):
@@ -448,15 +457,6 @@ class RedBlackTreeNode(object):
         self.right = None
         self.key = key
         self.value = value
-        return
-
-    def depth_first_search(self):
-        if self.left is not None:
-            self.left.dfs()
-        yield self
-        if self.right is not None:
-            self.right.dfs()
-
         return
 
     def debug(self):
