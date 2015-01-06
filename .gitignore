@@ -1,4 +1,5 @@
 *.py[co]
+.pypirc
 
 # Packages
 *.egg
@@ -15,6 +16,7 @@ develop-eggs
 
 # Installer logs
 pip-log.txt
+MANIFEST
 
 # Unit test / coverage reports
 .coverage
