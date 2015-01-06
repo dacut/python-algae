@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-setup(name="Algae",
+setup(name="algae",
       version="0.1.0",
       description="Python advanced collections library",
       author="David Cuthbert",
