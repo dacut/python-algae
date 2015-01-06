@@ -399,7 +399,7 @@ the node must not be None.
         return list(self.iteritems())
 
     def max(self, key=unspecified):
-        if key is unspecified:
+        if key is RedBlackTree.unspecified:
             node = self.root
             if node is None:
                 return None
@@ -411,8 +411,8 @@ the node must not be None.
                 return None
         return (node.key, node.value)
 
-    def max(self, key=unspecified):
-        if key is unspecified:
+    def min(self, key=unspecified):
+        if key is RedBlackTree.unspecified:
             node = self.root
             if node is None:
                 return None
