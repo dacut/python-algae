@@ -293,7 +293,7 @@ the node must not be None.
 
         # We're going to splice x into y's position.  First, we need to set
         # x's parent to y's parent (and pretend to maintain this in the event
-        # that x is None -- this is the sentinel nil[T] in the CLRS book).
+        # that x is None -- this is the sentinel nil[T] in CLRS).
         x_parent = y.parent
         if x is not None:
             x.parent = x_parent
@@ -328,6 +328,7 @@ the node must not be None.
 
             if x is x_parent.left:
                 w = x_parent.right
+                assert w is not None
 
                 if w.red:
                     # Case 1: w is red; thus, both of w's children are black.
@@ -337,6 +338,7 @@ the node must not be None.
                     x_parent.red = True
                     self.__left_rotate(x_parent)
                     w = x_parent.right
+                    assert w is not None
 
                 if (RedBlackTree.__is_black(w.left) and
                     RedBlackTree.__is_black(w.right)):
@@ -347,20 +349,24 @@ the node must not be None.
                 else:
                     # Case 3:
                     if RedBlackTree.__is_black(w.right):
-                        w.left.red = False
+                        if w.left is not None:
+                            w.left.red = False
                         w.red = True
                         self.__right_rotate(w)
                         w = x_parent.right
+                        assert w is not None
                     
                     # Case 4:
                     w.red = x_parent.red
-                    x.parent.red = False
-                    w.right.red = False
+                    x_parent.red = False
+                    if w.right is not None:
+                        w.right.red = False
                     self.__left_rotate(x_parent)
                     x = self.root
                     x_parent = None
             else:
                 w = x_parent.left
+                assert w is not None
 
                 if w.red:
                     # Case 1: w is red; thus, both of w's children are black.
@@ -370,6 +376,7 @@ the node must not be None.
                     x_parent.red = True
                     self.__right_rotate(x_parent)
                     w = x_parent.left
+                    assert w is not None
 
                 if (RedBlackTree.__is_black(w.left) and
                     RedBlackTree.__is_black(w.right)):
@@ -384,11 +391,12 @@ the node must not be None.
                         w.red = True
                         self.__left_rotate(w)
                         w = x_parent.left
-                    
+
                     # Case 4:
                     w.red = x_parent.red
                     x_parent.red = False
-                    w.right.red = False
+                    if w.left is not None:
+                        w.left.red = False
                     self.__right_rotate(x_parent)
                     x = self.root
                     x_parent = None
