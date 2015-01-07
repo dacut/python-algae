@@ -1,3 +1,4 @@
+from math import e, pi
 import os, sys
 import unittest
 
@@ -77,6 +78,29 @@ class TestRedBlackTree(unittest.TestCase):
             self.assertTrue(key in x)
             self.assertFalse(key + 1000 in x)
 
+    def test_mixed_insert_delete(self):
+        # This is list of the numbers 0-255 randomized but in a reproducible
+        # fashion.
+        numbers = range(256)
+        numbers.sort(key=lambda x: (
+            str(pi ** x).replace(".", "")[x % 5:x % 5 + 4]))
+        x = RedBlackTree()
+        for i in numbers:
+            x[i] = i
+
+        for i in xrange(256):
+            self.assertEqual(x[i], i)
+
+        # Delete in a different random order
+        numbers.sort(key=lambda x: (
+            str(e ** x).replace(".", "")[x % 5:x % 5 + 4]))
+        for i in numbers:
+            self.assertTrue(i in x)
+            del x[i]
+            self.assertFalse(i in x)
+
+        return
+
     def test_min_max_del(self):
         x = RedBlackTree()
 
@@ -137,6 +161,15 @@ class TestRedBlackTree(unittest.TestCase):
             del x[val]
             if x.root is not None:
                 x.root.check()
+
+        # Make sure removing a node that doesn't exist fails.
+        try:
+            del x[0]
+            self.fail("Expected KeyError")
+        except KeyError:
+            pass
+
+        return
 
     def test_debug(self):
         x = RedBlackTree()
@@ -216,6 +249,10 @@ class TestRedBlackTree(unittest.TestCase):
             self.fail("Expected AssertionError")
         except AssertionError:
             pass
+
+        self.assertEquals(repr(root),
+                          "RedBlackTreeNode(key=5, value=5, red=False)")
+        return
 
     def test_adjacents(self):
         root = RedBlackTreeNode(5, 5)
