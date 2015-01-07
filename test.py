@@ -87,25 +87,23 @@ class TestRedBlackTree(unittest.TestCase):
         except KeyError:
             pass
 
-        #print(x.root.debug())
-
+        self.assertEqual(x.min(), (0, 0))
+        self.assertEqual(x.max(), (30, 30))
         self.assertEqual(x.min(15), (14, 14))
         self.assertEqual(x.max(15), (16, 16))
         self.assertEqual(x.min(16), (16, 16))
         self.assertEqual(x.max(16), (16, 16))
+        self.assertIsNone(x.min(-20))
+        self.assertIsNone(x.max(40))
 
         del x[18]
         self.assertEqual(x.min(17), (16, 16))
         self.assertEqual(x.max(17), (20, 20))
 
-        #print(x.root.debug())
-
         self.assertEqual(x.root.key, 6)
         del x[6]
         self.assertEqual(x.min(6), (4, 4))
         self.assertEqual(x.max(6), (8, 8))
-
-        #print(x.root.debug())
         return
 
     def test_unbalanced_del(self):
