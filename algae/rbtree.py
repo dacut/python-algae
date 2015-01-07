@@ -589,8 +589,8 @@ class RedBlackTreeNode(object):
                 right_height += 1
 
         if left_height != right_height:
-            raise ValueError("left and right black heights are unequal: "
-                             "%d vs %d" % (left_height, right_height))
+            raise AssertionError("left and right black heights are unequal: "
+                                 "%d vs %d" % (left_height, right_height))
 
         return left_height
 

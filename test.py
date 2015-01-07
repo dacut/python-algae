@@ -4,6 +4,7 @@ import unittest
 sys.path = [os.getcwd()] + sys.path
 
 from algae.collections import RedBlackTree
+from algae.rbtree import RedBlackTreeNode
 
 class TestRedBlackTree(unittest.TestCase):
     def test_ascending_insert(self):
@@ -141,6 +142,31 @@ class TestRedBlackTree(unittest.TestCase):
                                     r"   / \   ",
                                     r"nil   nil",]))
 
+        x[0] = 0
+        self.assertEqual(x.root.debug(),
+                         "\n".join([r"-----1 [b]-----",
+                                    r"         / \   ",
+                                    r"--0 [r]--   nil",
+                                    r"   / \         ",
+                                    r"nil   nil      "]))
+
+        x[2] = 2
+        self.assertEqual(x.root.debug(),
+                         "\n".join([r"--------1 [b]--------",
+                                    r"         / \         ",
+                                    r"--0 [r]--   --2 [r]--",
+                                    r"   / \         / \   ",
+                                    r"nil   nil   nil   nil"]))
+
+        del x[0]
+        self.assertEqual(x.root.debug(),
+                         "\n".join([r"-----1 [b]-----",
+                                    r"   / \         ",
+                                    r"nil   --2 [r]--",
+                                    r"         / \   ",
+                                    r"      nil   nil"]))
+        
+
     def test_initialization(self):
         x = RedBlackTree({1: 2, 5: 6})
         self.assertEqual(x[1], 2)
@@ -167,7 +193,25 @@ class TestRedBlackTree(unittest.TestCase):
         self.assertEqual(x[2], 2)
 
         self.assertEqual(repr(x), "{0: 0, 1: 1, 2: 2}")
-        
+
+    def test_black_height(self):
+        root = RedBlackTreeNode(5, 5)
+        left = RedBlackTreeNode(0, 0)
+        right = RedBlackTreeNode(10, 10)
+        root.red = left.red = right.red = False
+        root.left = left
+        root.right = right
+        left.parent = right.parent = root
+
+        self.assertEqual(root.black_height, 2)
+        left.red = right.red = True
+        self.assertEqual(root.black_height, 1)
+        right.red = False
+        try:
+            root.black_height
+            self.fail("Expected AssertionError")
+        except AssertionError:
+            pass
 
 if __name__ == "__main__":
     unittest.main()
