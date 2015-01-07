@@ -165,6 +165,8 @@ class TestRedBlackTree(unittest.TestCase):
         self.assertEqual(x[1], 1)
         self.assertTrue(2 in x)
         self.assertEqual(x[2], 2)
+
+        self.assertEqual(repr(x), "{0: 0, 1: 1, 2: 2}")
         
 
 if __name__ == "__main__":
