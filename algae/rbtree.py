@@ -1,4 +1,5 @@
-from __future__ import (absolute_import, division, with_statement)
+from __future__ import (absolute_import, division, print_function,
+                        with_statement)
 from algae.functions import identity
 from functools import partial
 from operator import lt
@@ -6,21 +7,37 @@ from operator import lt
 class RedBlackTree(object):
     unspecified = object()
 
-    """A binary search tree which guarantees that basic operations take place
-in O(lg n) time.  The terminology and basic algorithmic structure is taken
-from Cormen, Leiserson, Rivest, Stein, _Introduction to Algorithms_ (Second
-Edition), pp. 273-301.
+    """
+    A binary search tree which guarantees that basic operations take place
+    in O(lg n) time.  The terminology and basic algorithmic structure is taken
+    from Cormen, Leiserson, Rivest, Stein, _Introduction to Algorithms_ (Second
+    Edition), pp. 273-301.
 
-Each node of the tree has a color, which is either red or black.  The
-red-black tree must satisfy the following properties:
-1. Every node is either red or black.
-2. The root node is black.
-3. Every leaf node (None) is black.
-4. If a node is red, then both of its children are black.
-5. For each node, all paths from the node to descendant leaves contain the
-   same number of black nodes.
+    Each node of the tree has a color, which is either red or black.  The
+    red-black tree must satisfy the following properties:
+    1. Every node is either red or black.
+    2. The root node is black.
+    3. Every leaf node (None) is black.
+    4. If a node is red, then both of its children are black.
+    5. For each node, all paths from the node to descendant leaves contain the
+       same number of black nodes.
 """
     def __init__(self, init=None, cmp=lt, key=identity):
+        """
+        RedBlackTree(init=None, cmp=operator.lt, key=identity)
+
+        Create a new RedBlackTree.
+
+        init specifies the initial values in the tree.  This must be a
+        dict-like object with iteritems() or items(), or a sequence of
+        (key, value) pairs.
+
+        cmp specifies a comparison function to use to sort the tree.  The
+        default is the less-than operator.
+
+        key specifies a function for obtaining the comparison key from each
+        node's key.  The default is the identity function.
+        """
         super(RedBlackTree, self).__init__()
         self.root = None
         self.compare_nodes = cmp
@@ -61,15 +78,16 @@ the node must not be None.
         return
 
     def __right_rotate(self, x):
-        """Perform a right rotation on the specified node.  The left child of
-the node must not be None.
-
-      |                |
-      x                y
-     / \    --->      / \
-    y   c            a   x
-   / \                  / \
-  a   b                b   c
+        """
+        Perform a right rotation on the specified node.  The left child of
+        the node must not be None.
+        
+              |                |
+              x                y
+             / \    --->      / \
+            y   c            a   x
+           / \                  / \
+          a   b                b   c
 """
         y = x.left
         x.left = y.right
@@ -87,6 +105,12 @@ the node must not be None.
         return
 
     def find_node_floor(self, key):
+        """
+        rbt.find_node_floor(key) -> RedBlackTreeNode
+
+        Find the largest node whose key is less than or equal to the specified
+        key.
+        """
         key = self.get_node_key(key)
         node = self.root
         last_smaller_node = None
@@ -108,6 +132,12 @@ the node must not be None.
         return last_smaller_node
 
     def find_node_ceil(self, key):
+        """
+        rbt.find_node_ceil(key) -> RedBlackTreeNode
+
+        Find the smallest node whose key is greater than or equal to the
+        specified key.
+        """
         key = self.get_node_key(key)
         node = self.root
         last_bigger_node = None
@@ -129,6 +159,11 @@ the node must not be None.
         return last_bigger_node
 
     def find_node(self, key):
+        """
+        rbt.find_node(key) -> RedBlackTreeNode
+
+        Find the node whose key is equal to the specified key.
+        """
         node = self.root
         key = self.get_node_key(key)
 
@@ -252,9 +287,12 @@ the node must not be None.
         else:
             x = y.right
 
-        # If x isn't a leaf node, we need to set its parent.
+        # We're going to splice x into y's position.  First, we need to set
+        # x's parent to y's parent (and pretend to maintain this in the event
+        # that x is None -- this is the sentinel nil[T] in the CLRS book).
+        x_parent = y.parent
         if x is not None:
-            x.parent = y.parent
+            x.parent = x_parent
 
         # Make y's parent point to x now.
         if y.parent is None:
@@ -269,81 +307,90 @@ the node must not be None.
             z.key = y.key
             z.value = y.value
 
-        if not y.red and x is not None:
-            self.__rb_delete_fixup(x)
+        if not y.red:
+            self.__rb_delete_fixup(x, x_parent)
         
         return y
 
-    def __rb_delete_fixup(self, x):
-        while x is not self.root and not x.red:
-            # x is not the root, so x.parent is non-nil.
-            if x is x.parent.left:
-                # w is the uncle node.  Since x is black, w cannot be nil;
-                # otherwise, x and w will have different black heights,
-                # and they're both children of x.parent.
-                w = x.parent.right
+    def __rb_delete_fixup(self, x, x_parent):
+        while x_parent is not None and (x is None or not x.red):
+            # x_parent is non-nil (i.e. x is not the root).
+            # x would need to be doubly-black or red-black to maintain
+            # invariants.
+
+            # w is x's sibling node.  Since x is black, w cannot be nil;
+            # otherwise, x and w will have different black heights,
+            # and they're both children of x_parent.
+
+            if x is x_parent.left:
+                w = x_parent.right
 
                 if w.red:
                     # Case 1: w is red; thus, both of w's children are black.
                     # We perform a left rotation on x's parent to move w into
                     # that spot, converting this into case 2.
                     w.red = False
-                    x.parent.red = True
-                    self.__left_rotate(x.parent)
-                    w = x.parent.right
+                    x_parent.red = True
+                    self.__left_rotate(x_parent)
+                    w = x_parent.right
 
-                if not w.left.red and not w.right.red:
-                    # Case 2:
+                if ((w.left is None or not w.left.red) and
+                    (w.right is None or not w.right.red)):
+                    # Case 2: w is black and both of w's children are black.
                     w.red = True
-                    x = x.parent
+                    x = x_parent
+                    x_parent = x.parent
                 else:
                     # Case 3:
-                    if not w.right.red:
+                    if (w.right is None or not w.right.red):
                         w.left.red = False
                         w.red = True
                         self.__right_rotate(w)
-                        w = x.parent.right
+                        w = x_parent.right
                     
                     # Case 4:
-                    w.red = x.parent.red
+                    w.red = x_parent.red
                     x.parent.red = False
                     w.right.red = False
-                    self.__left_rotate(x.parent)
+                    self.__left_rotate(x_parent)
                     x = self.root
+                    x_parent = None
             else:
-                # w is the uncle node.  Since x is black, w cannot be nil;
-                # otherwise, x and w will have different black heights,
-                # and they're both children of x.parent.
-                w = x.parent.left
+                w = x_parent.left
 
                 if w.red:
                     # Case 1: w is red; thus, both of w's children are black.
                     # We perform a left rotation on x's parent to move w into
                     # that spot, converting this into case 2.
                     w.red = False
-                    x.parent.red = True
-                    self.__right_rotate(x.parent)
-                    w = x.parent.left
+                    x_parent.red = True
+                    self.__right_rotate(x_parent)
+                    w = x_parent.left
 
-                if not w.left.red and not w.right.red:
+                if ((w.left is None or not w.left.red) and
+                    (w.right is None or not w.right.red)):
                     # Case 2:
                     w.red = True
-                    x = x.parent
+                    x = x_parent
+                    x_parent = x.parent
                 else:
                     # Case 3:
-                    if not w.left.red:
+                    if (w.left is None or not w.left.red):
                         w.right.red = False
                         w.red = True
                         self.__left_rotate(w)
-                        w = x.parent.left
+                        w = x_parent.left
                     
                     # Case 4:
-                    w.red = x.parent.red
-                    x.parent.red = False
+                    w.red = x_parent.red
+                    x_parent.red = False
                     w.right.red = False
-                    self.__right_rotate(x.parent)
+                    self.__right_rotate(x_parent)
                     x = self.root
-        x.red = False
+                    x_parent = None
+        
+        if x is not None:
+            x.red = False
         return
 
     def __rb_min(self):
@@ -399,6 +446,14 @@ the node must not be None.
         return list(self.iteritems())
 
     def max(self, key=unspecified):
+        """
+        rbt.max(key=...) -> (key, value)
+
+        Returns the (key, value) of the smallest node whose key is greater than
+        or equal to the specified key.  If a key is not specified, the maximum
+        (key, value) in the tree is returned.
+        """
+
         if key is RedBlackTree.unspecified:
             node = self.root
             if node is None:
@@ -412,6 +467,13 @@ the node must not be None.
         return (node.key, node.value)
 
     def min(self, key=unspecified):
+        """
+        rbt.min(key=...) -> (key, value)
+
+        Returns the (key, value) of the largest node whose key is less than
+        or equal to the specified key.  If a key is not specified, the minimum
+        (key, value) in the tree is returned.
+        """
         if key is RedBlackTree.unspecified:
             node = self.root
             if node is None:
@@ -441,6 +503,11 @@ the node must not be None.
                                  for key, value in self.iteritems()]) + "}")
 
 def generate_nodes(node, transform=identity):
+    """
+    generate_nodes(node, transform=identity) -> generator
+
+    Perform an in-order traversal of the subtree rooted at node.
+    """
     if node is not None:
         for child in generate_nodes(node.left, transform):
             yield child
@@ -572,3 +639,7 @@ class RedBlackTreeNode(object):
             pred = pred.right
         
         return pred
+
+    def __repr__(self):
+        return ("RedBlackTreeNode(key=%r, value=%r, red=%r)" %
+                (self.key, self.value, self.red))

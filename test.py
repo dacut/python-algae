@@ -68,6 +68,58 @@ class TestRedBlackTree(unittest.TestCase):
             self.assertEqual(x.items(), items)
             self.assertEqual(x.root.key, 0)
 
+    def test_min_max_del(self):
+        x = RedBlackTree()
+        for value in xrange(0, 32, 2):
+            x[value] = value
+
+        try:
+            ignored = x[1]
+            self.fail("Expected KeyError")
+        except KeyError:
+            pass
+
+        #print(x.root.debug())
+
+        self.assertEqual(x.min(15), (14, 14))
+        self.assertEqual(x.max(15), (16, 16))
+        self.assertEqual(x.min(16), (16, 16))
+        self.assertEqual(x.max(16), (16, 16))
+
+        del x[18]
+        self.assertEqual(x.min(17), (16, 16))
+        self.assertEqual(x.max(17), (20, 20))
+
+        #print(x.root.debug())
+
+        self.assertEqual(x.root.key, 6)
+        del x[6]
+        self.assertEqual(x.min(6), (4, 4))
+        self.assertEqual(x.max(6), (8, 8))
+
+        #print(x.root.debug())
+        return
+
+    def test_unbalanced_del(self):
+        x = RedBlackTree()
+        for value in xrange(16):
+            x[value] = value
+            x.root.check()
+            
+        print(x.root.debug())
+        del x[0]
+        print(x.root.debug())
+        x.root.check()
+
+        del x[2]
+        print(x.root.debug())
+        x.root.check()
+        
+        del x[1]
+        print(x.root.debug())
+        x.root.check()
+        
+
     def test_debug(self):
         x = RedBlackTree()
         x[1] = 1
