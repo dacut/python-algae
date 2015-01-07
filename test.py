@@ -79,6 +79,10 @@ class TestRedBlackTree(unittest.TestCase):
 
     def test_min_max_del(self):
         x = RedBlackTree()
+
+        self.assertIsNone(x.min())
+        self.assertIsNone(x.max())
+
         for value in xrange(0, 32, 2):
             x[value] = value
 
