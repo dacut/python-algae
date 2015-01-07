@@ -150,5 +150,22 @@ class TestRedBlackTree(unittest.TestCase):
         self.assertEqual(x[1], 2)
         self.assertEqual(x[5], 6)
 
+    def test_update_items(self):
+        class Dictish(object):
+            def items(self):
+                for x in ((0, 0), (1, 1), (2, 2)):
+                    yield x
+        
+        d = Dictish()
+        x = RedBlackTree()
+        x.update(d)
+        self.assertTrue(0 in x)
+        self.assertEqual(x[0], 0)
+        self.assertTrue(1 in x)
+        self.assertEqual(x[1], 1)
+        self.assertTrue(2 in x)
+        self.assertEqual(x[2], 2)
+        
+
 if __name__ == "__main__":
     unittest.main()
