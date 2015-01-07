@@ -73,6 +73,8 @@ class TestRedBlackTree(unittest.TestCase):
             x[key] = key + 1
             self.assertEqual(x[key], key + 1)
 
+            self.assertTrue(key in x)
+            self.assertFalse(key + 1000 in x)
 
     def test_min_max_del(self):
         x = RedBlackTree()
@@ -112,41 +114,30 @@ class TestRedBlackTree(unittest.TestCase):
             x[value] = value
             x.root.check()
             
-        print(x.root.debug())
         del x[0]
-        print(x.root.debug())
         x.root.check()
 
         del x[2]
-        print(x.root.debug())
         x.root.check()
         
         del x[1]
-        print(x.root.debug())
         x.root.check()
 
         # Need this to create a non-empty left branch on node 8 to test
         # the branch "y.left is not None" in __rb_delete.
         x[7.5] = 7.5
-        print(x.root.debug())
         del x[8]
         del x[7.5]
         
-        print(x.root.debug())
-
         # Remove the rest of the nodes
         for val in [7, 6, 5, 4, 3, 12, 10, 9, 13, 11, 15, 14]:
-            print("Deleting node %s" % val)
             del x[val]
             if x.root is not None:
-                print(x.root.debug())
                 x.root.check()
 
     def test_debug(self):
         x = RedBlackTree()
         x[1] = 1
-        print("\n")
-        print(x.root.debug())
         self.assertEqual(x.root.debug(), 
                          "\n".join([r"--1 [b]--",
                                     r"   / \   ",
