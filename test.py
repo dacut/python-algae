@@ -213,5 +213,26 @@ class TestRedBlackTree(unittest.TestCase):
         except AssertionError:
             pass
 
+    def test_adjacents(self):
+        root = RedBlackTreeNode(5, 5)
+        self.assertIsNone(root.predecessor)
+        self.assertIsNone(root.successor)
+        
+        root.left = RedBlackTreeNode(2, 2)
+        root.right = RedBlackTreeNode(8, 8)
+        self.assertIs(root.predecessor, root.left)
+        self.assertIs(root.successor, root.right)
+        
+        root.left.right = RedBlackTreeNode(3, 3)
+        root.right.left = RedBlackTreeNode(7, 7)
+        self.assertIs(root.predecessor, root.left.right)
+        self.assertIs(root.successor, root.right.left)
+
+        root.left.right.right = RedBlackTreeNode(4, 4)
+        root.right.left.left = RedBlackTreeNode(6, 6)
+        self.assertIs(root.predecessor, root.left.right.right)
+        self.assertIs(root.successor, root.right.left.left)
+        return
+
 if __name__ == "__main__":
     unittest.main()
