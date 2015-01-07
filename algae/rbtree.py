@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function,
 from algae.functions import identity
 from functools import partial
 from operator import lt
+from weakref import ref
 
 class RedBlackTree(object):
     unspecified = object()
@@ -518,14 +519,33 @@ def generate_nodes(node, transform=identity):
             yield child
 
 class RedBlackTreeNode(object):
+    __slots__ = ["red", "parentref", "left", "right", "key", "value",
+                 "__weakref__"]
+
     def __init__(self, key, value):
         super(RedBlackTreeNode, self).__init__()
         self.red = True
-        self.parent = None
+        self.parentref = None
         self.left = None
         self.right = None
         self.key = key
         self.value = value
+        return
+
+    @property
+    def parent(self):
+        if self.parentref is None:
+            return None
+        else:
+            return self.parentref()
+    
+    @parent.setter
+    def parent(self, value):
+        if value is None:
+            self.parentref = None
+        else:
+            self.parentref = ref(value)
+
         return
 
     def debug(self):
