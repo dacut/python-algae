@@ -51,6 +51,10 @@ class RedBlackTree(object):
     def __is_red(node):
         return node is not None and node.red
 
+    @staticmethod
+    def __is_black(node):
+        return node is None or not node.red
+
     def __left_rotate(self, x):
         """Perform a left rotation on the specified node.  The right child of
 the node must not be None.
@@ -313,7 +317,7 @@ the node must not be None.
         return y
 
     def __rb_delete_fixup(self, x, x_parent):
-        while x_parent is not None and (x is None or not x.red):
+        while x_parent is not None and RedBlackTree.__is_black(x):
             # x_parent is non-nil (i.e. x is not the root).
             # x would need to be doubly-black or red-black to maintain
             # invariants.
@@ -334,15 +338,15 @@ the node must not be None.
                     self.__left_rotate(x_parent)
                     w = x_parent.right
 
-                if ((w.left is None or not w.left.red) and
-                    (w.right is None or not w.right.red)):
+                if (RedBlackTree.__is_black(w.left) and
+                    RedBlackTree.__is_black(w.right)):
                     # Case 2: w is black and both of w's children are black.
                     w.red = True
                     x = x_parent
                     x_parent = x.parent
                 else:
                     # Case 3:
-                    if (w.right is None or not w.right.red):
+                    if RedBlackTree.__is_black(w.right):
                         w.left.red = False
                         w.red = True
                         self.__right_rotate(w)
@@ -367,15 +371,15 @@ the node must not be None.
                     self.__right_rotate(x_parent)
                     w = x_parent.left
 
-                if ((w.left is None or not w.left.red) and
-                    (w.right is None or not w.right.red)):
+                if (RedBlackTree.__is_black(w.left) and
+                    RedBlackTree.__is_black(w.right)):
                     # Case 2:
                     w.red = True
                     x = x_parent
                     x_parent = x.parent
                 else:
                     # Case 3:
-                    if (w.left is None or not w.left.red):
+                    if RedBlackTree.__is_black(w.left):
                         w.right.red = False
                         w.red = True
                         self.__left_rotate(w)
