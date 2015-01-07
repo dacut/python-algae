@@ -67,6 +67,12 @@ class TestRedBlackTree(unittest.TestCase):
             self.assertEqual(x.values(), values)
             self.assertEqual(x.items(), items)
             self.assertEqual(x.root.key, 0)
+            
+        # Replace some of the keys.
+        for key in xrange(1, 200):
+            x[key] = key + 1
+            self.assertEqual(x[key], key + 1)
+
 
     def test_min_max_del(self):
         x = RedBlackTree()

@@ -405,16 +405,6 @@ the node must not be None.
             x.red = False
         return
 
-    def __rb_min(self):
-        """Returns the minimum node of the tree."""
-        if self.root is None:
-            return None
-
-        n = self.root
-        while n.left is not None:
-            n = n.left
-        return n
-
     def __getitem__(self, key):
         node = self.find_node(key)
         if node is None:
