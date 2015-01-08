@@ -91,6 +91,10 @@ class TestRedBlackTree(unittest.TestCase):
         for i in xrange(256):
             self.assertEqual(x[i], i)
 
+        # Make sure we get proper sublists.
+        self.assertEquals(x.keys(start=250), [250, 251, 252, 253, 254, 255])
+        self.assertEquals(x.keys(start=3, reverse=True), [3, 2, 1, 0])
+
         # Delete in a different random order
         numbers.sort(key=lambda x: (
             str(e ** x).replace(".", "")[x % 5:x % 5 + 4]))

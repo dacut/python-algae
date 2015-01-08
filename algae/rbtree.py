@@ -430,23 +430,26 @@ the node must not be None.
             raise KeyError("Unknown key: %r" % (key,))
         self.__rb_delete(node)
 
-    def iterkeys(self):
-        return generate_nodes(self.root, lambda n: n.key)
+    def iterkeys(self, start=unspecified, reverse=False):
+        return generate_nodes(self, self.root, lambda n: n.key,
+                              self.get_node_key(start), reverse)
 
-    def itervalues(self):
-        return generate_nodes(self.root, lambda n: n.value)
+    def itervalues(self, start=unspecified, reverse=False):
+        return generate_nodes(self, self.root, lambda n: n.value,
+                              self.get_node_key(start), reverse)
 
-    def iteritems(self):
-        return generate_nodes(self.root, lambda n: (n.key, n.value))
+    def iteritems(self, start=unspecified, reverse=False):
+        return generate_nodes(self, self.root, lambda n: (n.key, n.value),
+                              self.get_node_key(start), reverse)
 
-    def keys(self):
-        return list(self.iterkeys())
+    def keys(self, start=unspecified, reverse=False):
+        return list(self.iterkeys(start=start, reverse=reverse))
 
-    def values(self):
-        return list(self.itervalues())
+    def values(self, start=unspecified, reverse=False):
+        return list(self.itervalues(start=start, reverse=reverse))
 
-    def items(self):
-        return list(self.iteritems())
+    def items(self, start=unspecified, reverse=False):
+        return list(self.iteritems(start=start, reverse=reverse))
 
     def max(self, key=unspecified):
         """
@@ -505,17 +508,45 @@ the node must not be None.
         return ("{" + ", ".join([repr(key) + ": " + repr(value)
                                  for key, value in self.iteritems()]) + "}")
 
-def generate_nodes(node, transform=identity):
+def generate_nodes(tree, node, transform=identity,
+                   start=RedBlackTree.unspecified, reverse=False):
     """
-    generate_nodes(node, transform=identity) -> generator
+    generate_nodes(tree, node, transform=identity,
+                   start=RedBlackTree.unspecified, reverse=False) -> generator
 
     Perform an in-order traversal of the subtree rooted at node.
+
+    If start is specified and reverse is False, only nodes greater than or
+    equal to the start value are returned.
+
+    If start is specified and reverse is True, only nodes less than or equal
+    to the start value are returned and in reverse order.
     """
     if node is not None:
-        for child in generate_nodes(node.left, transform):
-            yield child
-        yield transform(node)
-        for child in generate_nodes(node.right, transform):
+        if not reverse:
+            left, right = node.left, node.right
+            # Note that we have to swap and reverse the comparison logic so we
+            # return nodes that are equal to the start node.
+            is_valid = (start is RedBlackTree.unspecified or 
+                        not tree.compare_nodes(tree.get_node_key(node.key),
+                                               start))
+        else:
+            left, right = node.right, node.left
+            is_valid = (start is RedBlackTree.unspecified or 
+                        not tree.compare_nodes(start,
+                                               tree.get_node_key(node.key)))
+
+        # If the current node's key is less than the start key (is_valid
+        # is False), all of the nodes in the left subtree will also be invalid.
+        # Thus, we only traverse that subtree if the test passes.
+        if is_valid:
+            for child in generate_nodes(tree, left, transform, start, reverse):
+                yield child
+            yield transform(node)
+        
+        # However, even if the current node's key is less than the start key,
+        # the right subtree might contain valid elements.
+        for child in generate_nodes(tree, right, transform, start, reverse):
             yield child
 
 class RedBlackTreeNode(object):
